@@ -5,71 +5,73 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
 const navItems = [
-  { href: '/admin', label: 'Dashboard', icon: '📊' },
-  { href: '/admin/add', label: 'Add Influencer', icon: '➕' },
+  { href: '/admin', label: 'Dashboard', icon: '◉' },
+  { href: '/admin/add', label: 'Add Influencer', icon: '+' },
 ];
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  const [sidebarOpen, setSidebarOpen] = useState(false);
-  const closeSidebar = useCallback(() => setSidebarOpen(false), []);
+  const [open, setOpen] = useState(false);
+  const close = useCallback(() => setOpen(false), []);
 
   return (
-    <div className="flex h-screen bg-[var(--bg-primary)]">
-      {sidebarOpen && (
-        <div className="fixed inset-0 bg-black/20 backdrop-blur-sm z-40 lg:hidden transition-opacity" onClick={closeSidebar} />
-      )}
+    <div className="flex h-screen">
+      {open && <div className="fixed inset-0 bg-black/40 z-40 lg:hidden" onClick={close} />}
 
-      <aside className={`fixed lg:static inset-y-0 left-0 z-50 w-60 bg-white border-r border-gray-100 flex flex-col transform transition-transform duration-200 ease-out lg:transform-none ${sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}`}>
-        <div className="p-5 border-b border-gray-100">
-          <Link href="/admin" className="flex items-center gap-2.5" onClick={closeSidebar}>
-            <div className="w-8 h-8 bg-black rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-xs">D</span>
+      <aside className={`fixed lg:static inset-y-0 left-0 z-50 w-56 flex flex-col transform transition-transform duration-200 lg:transform-none ${open ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}`} style={{ background: 'var(--sidebar-bg)' }}>
+        <div className="p-5">
+          <Link href="/admin" className="flex items-center gap-2.5" onClick={close}>
+            <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: 'var(--accent)' }}>
+              <span className="text-white font-bold text-sm">D</span>
             </div>
             <div>
-              <h1 className="font-semibold text-gray-900 text-[15px] leading-tight tracking-tight">Dropy Affiliates</h1>
-              <p className="text-[11px] text-gray-400 tracking-wide">dropy.in</p>
+              <h1 className="font-bold text-white text-sm tracking-tight">Dropy</h1>
+              <p className="text-[10px] tracking-wider" style={{ color: 'var(--sidebar-text)' }}>AFFILIATES</p>
             </div>
           </Link>
         </div>
 
-        <nav className="flex-1 p-3 space-y-0.5">
+        <nav className="flex-1 px-3 mt-4 space-y-0.5">
           {navItems.map((item) => {
             const isActive = pathname === item.href;
             return (
               <Link
                 key={item.href}
                 href={item.href}
-                onClick={closeSidebar}
-                className={`flex items-center gap-2.5 px-3 py-2 rounded-lg text-[13px] font-medium transition-all duration-150 ${
+                onClick={close}
+                className={`flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-[13px] font-medium transition-all duration-150 ${
                   isActive
-                    ? 'bg-gray-900 text-white'
-                    : 'text-gray-500 hover:bg-gray-50 hover:text-gray-900'
+                    ? 'text-white'
+                    : 'hover:text-white'
                 }`}
+                style={{
+                  color: isActive ? 'var(--sidebar-active)' : 'var(--sidebar-text)',
+                  background: isActive ? 'rgba(255,255,255,0.08)' : 'transparent',
+                }}
               >
-                <span className="text-sm">{item.icon}</span>
+                <span className="text-xs w-5 text-center">{item.icon}</span>
                 {item.label}
               </Link>
             );
           })}
         </nav>
 
-        <div className="p-4 border-t border-gray-100">
-          <p className="text-[10px] text-gray-300 text-center uppercase tracking-widest">Built for Dropy India</p>
+        <div className="p-4">
+          <div className="rounded-lg p-3" style={{ background: 'rgba(255,255,255,0.04)' }}>
+            <p className="text-[10px] font-medium" style={{ color: 'var(--sidebar-text)' }}>POWERED BY</p>
+            <p className="text-[11px] text-white font-semibold mt-0.5">Dropy India</p>
+          </div>
         </div>
       </aside>
 
-      <main className="flex-1 overflow-auto">
-        <div className="lg:hidden flex items-center gap-3 px-4 py-3 border-b border-gray-100 bg-white/80 backdrop-blur-sm sticky top-0 z-30">
-          <button onClick={() => setSidebarOpen(true)} className="text-gray-500 hover:text-gray-900 transition-colors">
+      <main className="flex-1 overflow-auto" style={{ background: 'var(--bg)' }}>
+        <div className="lg:hidden flex items-center gap-3 px-4 py-3 border-b bg-white sticky top-0 z-30" style={{ borderColor: 'var(--border)' }}>
+          <button onClick={() => setOpen(true)} className="text-gray-500">
             <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"><path d="M3 10h14M3 5h14M3 15h14"/></svg>
           </button>
-          <span className="font-semibold text-sm text-gray-900 tracking-tight">Dropy Affiliates</span>
+          <span className="font-bold text-sm tracking-tight">Dropy Affiliates</span>
         </div>
-
-        <div className="p-4 sm:p-6 lg:p-8 page-enter">
-          {children}
-        </div>
+        <div className="p-4 sm:p-6 lg:p-8 page-enter">{children}</div>
       </main>
     </div>
   );
