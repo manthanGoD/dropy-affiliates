@@ -88,14 +88,10 @@ export default function InfluencerDashboard() {
         </div>
 
         {/* Stats */}
-        <div className="grid grid-cols-3 gap-3">
+        <div className="grid grid-cols-2 gap-3">
           <div className="glass p-5 text-center">
             <p className="text-3xl font-bold" style={{ color: 'var(--purple)' }}>{stats.orders}</p>
             <p className="text-[10px] uppercase tracking-[0.15em] mt-1.5" style={{ color: 'var(--text-muted)' }}>Orders</p>
-          </div>
-          <div className="glass p-5 text-center">
-            <p className="text-3xl font-bold" style={{ color: 'var(--orange)' }}>{fmt(stats.revenue)}</p>
-            <p className="text-[10px] uppercase tracking-[0.15em] mt-1.5" style={{ color: 'var(--text-muted)' }}>Revenue</p>
           </div>
           <div className="rounded-[20px] p-5 text-center text-white shadow-lg" style={{ background: 'linear-gradient(135deg, #00b894, #55efc4)', boxShadow: '0 8px 24px rgba(0,184,148,0.25)' }}>
             <p className="text-3xl font-bold">{fmt(stats.commission)}</p>
@@ -138,8 +134,7 @@ export default function InfluencerDashboard() {
               <div key={i} className="px-5 py-3 flex items-center justify-between border-b last:border-0" style={{ borderColor: 'rgba(0,0,0,0.03)' }}>
                 <p className="text-xs" style={{ color: 'var(--text-sec)' }}>{format(new Date(o.date), 'dd MMM, h:mm a')}</p>
                 <div className="text-right">
-                  <p className="text-xs font-bold" style={{ color: 'var(--text)' }}>{fmt(o.revenue)}</p>
-                  <p className="text-[10px] font-bold" style={{ color: 'var(--green)' }}>+{fmt(o.commission)}</p>
+                  <p className="text-sm font-bold" style={{ color: 'var(--green)' }}>+{fmt(o.commission)}</p>
                 </div>
               </div>
             ))}
