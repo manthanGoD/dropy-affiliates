@@ -5,16 +5,35 @@ import { generateCampaignName } from '@/lib/utils';
 
 // GET — list all influencers with stats
 export async function GET() {
-  const { data, error } = await supabaseAdmin
+  // Try the view first, fall back to base table
+  let { data, error } = await supabaseAdmin
     .from('influencer_stats')
     .select('*')
     .order('created_at', { ascending: false });
 
   if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    console.error('View query failed, falling back to base table:', error.message);
+    const fallback = await supabaseAdmin
+      .from('influencers')
+      .select('*')
+      .order('created_at', { ascending: false });
+
+    if (fallback.error) {
+      return NextResponse.json({ error: fallback.error.message }, { status: 500 });
+    }
+
+    // Add zero stats to each influencer
+    data = (fallback.data || []).map(inf => ({
+      ...inf,
+      total_orders: 0,
+      total_revenue: 0,
+      total_discounts: 0,
+      total_net_revenue: 0,
+      total_commission: 0,
+    }));
   }
 
-  return NextResponse.json(data);
+  return NextResponse.json(data || []);
 }
 
 // POST — add new influencer + create Shopify campaign & discount
@@ -34,16 +53,19 @@ export async function POST(req: NextRequest) {
       notes,
     } = body;
 
+    console.log('[1] Starting influencer creation for:', name);
+
     // 1. Generate campaign name
     const campaignName = generateCampaignName(name, platform);
+    console.log('[2] Campaign name:', campaignName);
 
     // 2. Create Shopify campaign
     let campaignResult = { campaign_id: '', shareable_link: '' };
     try {
       campaignResult = await createCampaign(campaignName);
+      console.log('[3] Shopify campaign created:', campaignResult.campaign_id);
     } catch (err) {
-      console.error('Campaign creation failed (non-blocking):', err);
-      // Generate manual UTM link as fallback
+      console.log('[3] Campaign creation failed (using fallback):', (err as Error).message);
       const utmCampaign = name.toLowerCase().replace(/\s+/g, '-');
       campaignResult = {
         campaign_id: utmCampaign,
@@ -55,43 +77,49 @@ export async function POST(req: NextRequest) {
     let discountResult = { discount_id: '', code: discount_code };
     try {
       discountResult = await createDiscountCode(discount_code, discount_type, discount_value);
+      console.log('[4] Shopify discount created:', discountResult.code);
     } catch (err) {
-      console.error('Discount creation failed:', err);
-      // Continue — admin can create manually in Shopify
+      console.log('[4] Discount creation failed (using fallback):', (err as Error).message);
     }
 
-    // 4. Build discount link (auto-applies discount + tracks campaign)
+    // 4. Build discount link
     const discountLink = `https://dropy.in/discount/${discount_code.toUpperCase()}?utm_campaign=${campaignResult.campaign_id}&utm_source=influencer&utm_medium=social`;
+    console.log('[5] Discount link:', discountLink);
 
     // 5. Save to Supabase
+    const insertPayload = {
+      name,
+      platform,
+      handle: handle || null,
+      profile_image_url: profile_image_url || null,
+      campaign_name: campaignName,
+      campaign_id: campaignResult.campaign_id,
+      shareable_link: discountLink,
+      discount_code: discount_code.toUpperCase(),
+      discount_type,
+      discount_value,
+      shopify_discount_id: discountResult.discount_id || null,
+      commission_pct,
+      payout_day: payout_day || 1,
+      notes: notes || null,
+    };
+    console.log('[6] Inserting to Supabase:', JSON.stringify(insertPayload));
+
     const { data, error } = await supabaseAdmin
       .from('influencers')
-      .insert({
-        name,
-        platform,
-        handle: handle || null,
-        profile_image_url: profile_image_url || null,
-        campaign_name: campaignName,
-        campaign_id: campaignResult.campaign_id,
-        shareable_link: discountLink,
-        discount_code: discount_code.toUpperCase(),
-        discount_type,
-        discount_value,
-        shopify_discount_id: discountResult.discount_id || null,
-        commission_pct,
-        payout_day: payout_day || 1,
-        notes: notes || null,
-      })
+      .insert(insertPayload)
       .select()
       .single();
 
     if (error) {
+      console.error('[7] SUPABASE INSERT FAILED:', error.message, error.details, error.hint);
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
+    console.log('[7] SUCCESS — influencer saved:', data.id);
     return NextResponse.json(data, { status: 201 });
   } catch (err) {
-    console.error('Failed to create influencer:', err);
+    console.error('[FATAL] Unhandled error:', err);
     return NextResponse.json(
       { error: err instanceof Error ? err.message : 'Unknown error' },
       { status: 500 }

@@ -38,7 +38,9 @@ async function shopifyREST(endpoint: string, method: string = 'GET', body?: unkn
 
   if (!res.ok) {
     const text = await res.text();
-    throw new Error(`Shopify REST error: ${res.status} — ${text}`);
+    const error = new Error(`Shopify REST error: ${res.status} — ${text}`);
+    (error as Error & { status: number }).status = res.status;
+    throw error;
   }
 
   return res.json();

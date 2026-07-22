@@ -13,7 +13,7 @@ export default function AdminDashboard() {
   async function fetchData() {
     const res = await fetch('/api/influencers');
     const data = await res.json();
-    setInfluencers(data);
+    setInfluencers(Array.isArray(data) ? data : []);
     setLoading(false);
   }
 
@@ -26,11 +26,6 @@ export default function AdminDashboard() {
 
   useEffect(() => { fetchData(); }, []);
 
-  const totalRevenue = influencers.reduce((s, i) => s + Number(i.total_revenue), 0);
-  const totalCommission = influencers.reduce((s, i) => s + Number(i.total_commission), 0);
-  const totalOrders = influencers.reduce((s, i) => s + i.total_orders, 0);
-  const activeCount = influencers.filter(i => i.status === 'active').length;
-
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -38,6 +33,11 @@ export default function AdminDashboard() {
       </div>
     );
   }
+
+  const totalRevenue = influencers.reduce((s, i) => s + Number(i.total_revenue), 0);
+  const totalCommission = influencers.reduce((s, i) => s + Number(i.total_commission), 0);
+  const totalOrders = influencers.reduce((s, i) => s + i.total_orders, 0);
+  const activeCount = influencers.filter(i => i.status === 'active').length;
 
   return (
     <div className="space-y-8">
