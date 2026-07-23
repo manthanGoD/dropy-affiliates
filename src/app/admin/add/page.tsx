@@ -24,6 +24,9 @@ export default function AddInfluencer() {
     commission_pct: number;
     payout_day: number;
     notes: string;
+    combines_product: boolean;
+    combines_order: boolean;
+    combines_shipping: boolean;
   }>({
     name: '',
     platform: 'instagram',
@@ -35,6 +38,9 @@ export default function AddInfluencer() {
     commission_pct: 5,
     payout_day: 1,
     notes: '',
+    combines_product: true,
+    combines_order: false,
+    combines_shipping: false,
   });
 
   // Auto-generate discount code when name or discount_value changes
@@ -185,7 +191,7 @@ Share the link in your bio and mention the code in your content. Let's get start
         {/* Actions */}
         <div className="flex gap-3">
           <button
-            onClick={() => { setResult(null); setForm({ name: '', platform: 'instagram', handle: '', profile_image_url: '', discount_code: '', discount_type: 'percentage', discount_value: 5, commission_pct: 5, payout_day: 1, notes: '' }); }}
+            onClick={() => { setResult(null); setForm({ name: '', platform: 'instagram', handle: '', profile_image_url: '', discount_code: '', discount_type: 'percentage', discount_value: 5, commission_pct: 5, payout_day: 1, notes: '', combines_product: true, combines_order: false, combines_shipping: false }); }}
             className="flex-1 px-4 py-2.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50"
           >
             + Add Another
@@ -309,6 +315,32 @@ Share the link in your bio and mention the code in your content. Let's get start
           </Field>
         </Section>
 
+        {/* Combinations */}
+        <Section title="Discount Stacking Rules">
+          <p className="text-xs mb-3" style={{ color: 'var(--text-sec, #666)' }}>Choose which other discounts can be used together with this influencer code at checkout.</p>
+          <div className="space-y-3">
+            <CombinationToggle
+              label="Product Discounts"
+              checked={form.combines_product}
+              onChange={v => setForm(f => ({ ...f, combines_product: v }))}
+              tooltip="Includes Buy-X-Get-Y, free gifts, and percentage-off on specific products or collections. Enable this so your free gift offers (like CeraVe) still work alongside the influencer code."
+              recommended
+            />
+            <CombinationToggle
+              label="Order Discounts"
+              checked={form.combines_order}
+              onChange={v => setForm(f => ({ ...f, combines_order: v }))}
+              tooltip="Includes flat-off codes (like FIRST200), other influencer codes, and any order-level discounts. Keep this OFF to prevent customers from stacking multiple discount codes — protects your margins."
+            />
+            <CombinationToggle
+              label="Shipping Discounts"
+              checked={form.combines_shipping}
+              onChange={v => setForm(f => ({ ...f, combines_shipping: v }))}
+              tooltip="Allows the influencer code to be used alongside free shipping or discounted shipping offers. Usually safe to leave OFF unless you run shipping promos."
+            />
+          </div>
+        </Section>
+
         {/* Commission */}
         <Section title="Commission & Payout">
           <div className="grid grid-cols-2 gap-4">
@@ -348,6 +380,7 @@ Share the link in your bio and mention the code in your content. Let's get start
               <p><span className="text-gray-500">Code:</span> <span className="font-mono font-medium">{form.discount_code.toUpperCase()}</span></p>
               <p><span className="text-gray-500">Customer gets:</span> <span className="font-medium">{form.discount_type === 'percentage' ? `${form.discount_value}%` : `₹${form.discount_value}`} off</span></p>
               <p><span className="text-gray-500">Influencer gets:</span> <span className="font-medium">{form.commission_pct}% commission</span></p>
+              <p><span className="text-gray-500">Stacks with:</span> <span className="font-medium">{[form.combines_product && 'Product', form.combines_order && 'Order', form.combines_shipping && 'Shipping'].filter(Boolean).join(', ') || 'Nothing (standalone)'}</span></p>
             </div>
           </div>
         )}
@@ -410,6 +443,37 @@ function CopyCard({ label, value, copied, onCopy }: { label: string; value: stri
       >
         {copied ? '✓ Copied' : 'Copy'}
       </button>
+    </div>
+  );
+}
+
+function CombinationToggle({ label, checked, onChange, tooltip, recommended }: { label: string; checked: boolean; onChange: (v: boolean) => void; tooltip: string; recommended?: boolean }) {
+  const [showTip, setShowTip] = useState(false);
+  return (
+    <div className="flex items-start gap-3 p-3 rounded-xl border transition-colors" style={{ borderColor: checked ? 'rgba(108,92,231,0.3)' : 'rgba(0,0,0,0.06)', background: checked ? 'rgba(108,92,231,0.03)' : 'transparent' }}>
+      <input
+        type="checkbox"
+        checked={checked}
+        onChange={e => onChange(e.target.checked)}
+        className="mt-0.5 rounded"
+      />
+      <div className="flex-1 min-w-0">
+        <div className="flex items-center gap-2">
+          <span className="text-sm font-medium" style={{ color: 'var(--text, #1a1a1a)' }}>{label}</span>
+          {recommended && <span className="text-[9px] px-1.5 py-0.5 rounded-full font-bold bg-emerald-100 text-emerald-700">RECOMMENDED</span>}
+          <button
+            type="button"
+            onClick={() => setShowTip(!showTip)}
+            className="w-4 h-4 rounded-full flex items-center justify-center text-[10px] font-bold shrink-0"
+            style={{ background: 'rgba(0,0,0,0.06)', color: '#888' }}
+          >
+            ?
+          </button>
+        </div>
+        {showTip && (
+          <p className="text-xs mt-1.5 leading-relaxed" style={{ color: 'var(--text-sec, #666)' }}>{tooltip}</p>
+        )}
+      </div>
     </div>
   );
 }

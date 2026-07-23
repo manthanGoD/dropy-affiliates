@@ -76,7 +76,8 @@ export async function createCampaign(campaignName: string) {
 export async function createDiscountCode(
   code: string,
   discountType: 'percentage' | 'fixed',
-  discountValue: number
+  discountValue: number,
+  combinesWith?: { productDiscounts: boolean; orderDiscounts: boolean; shippingDiscounts: boolean }
 ) {
   // Use GraphQL to create discount with correct combinations
   const mutation = `
@@ -110,7 +111,7 @@ export async function createDiscountCode(
       },
       customerSelection: { all: true },
       appliesOncePerCustomer: true,
-      combinesWith: {
+      combinesWith: combinesWith || {
         productDiscounts: true,
         orderDiscounts: false,
         shippingDiscounts: false,

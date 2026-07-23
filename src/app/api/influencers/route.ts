@@ -51,6 +51,9 @@ export async function POST(req: NextRequest) {
       commission_pct,
       payout_day,
       notes,
+      combines_product,
+      combines_order,
+      combines_shipping,
     } = body;
 
     console.log('[1] Starting influencer creation for:', name);
@@ -76,7 +79,11 @@ export async function POST(req: NextRequest) {
     // 3. Create Shopify discount code
     let discountResult = { discount_id: '', code: discount_code };
     try {
-      discountResult = await createDiscountCode(discount_code, discount_type, discount_value);
+      discountResult = await createDiscountCode(discount_code, discount_type, discount_value, {
+        productDiscounts: combines_product ?? true,
+        orderDiscounts: combines_order ?? false,
+        shippingDiscounts: combines_shipping ?? false,
+      });
       console.log('[4] Shopify discount created:', discountResult.code);
     } catch (err) {
       console.log('[4] Discount creation failed (using fallback):', (err as Error).message);
