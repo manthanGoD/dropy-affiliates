@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase';
-import { createCampaign, createDiscountCode } from '@/lib/shopify';
+import { createCampaign, createDiscountCode, createShortLink } from '@/lib/shopify';
 import { generateCampaignName } from '@/lib/utils';
 
 // GET — list all influencers with stats
@@ -54,7 +54,11 @@ export async function POST(req: NextRequest) {
       combines_product,
       combines_order,
       combines_shipping,
+      destination,
+      destination_custom,
     } = body;
+
+    const destPath = destination === 'custom' ? (destination_custom || '/') : (destination || '/');
 
     console.log('[1] Starting influencer creation for:', name);
 
@@ -93,10 +97,17 @@ export async function POST(req: NextRequest) {
       console.log('[4] No customer discount — skipping Shopify discount creation');
     }
 
-    // 4. Build shareable link — short tracking URL
-    const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://dropy-affiliates.vercel.app';
-    const shortLink = `${appUrl}/${discount_code.toUpperCase()}`;
-    console.log('[5] Shareable link:', shortLink);
+    // 4. Create Shopify short link (dropy.in/s/code)
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://go.dropy.in';
+    let shortLink = `${appUrl}/${discount_code.toUpperCase()}`;
+
+    try {
+      const redirectResult = await createShortLink(discount_code.toLowerCase(), destPath);
+      shortLink = redirectResult.short_url;
+      console.log('[5] Shopify short link created:', shortLink);
+    } catch (err) {
+      console.log('[5] Short link failed (using fallback):', (err as Error).message);
+    }
 
     // 5. Save to Supabase
     const insertPayload = {

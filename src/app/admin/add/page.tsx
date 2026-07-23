@@ -27,6 +27,8 @@ export default function AddInfluencer() {
     combines_product: boolean;
     combines_order: boolean;
     combines_shipping: boolean;
+    destination: string;
+    destination_custom: string;
   }>({
     name: '',
     platform: 'instagram',
@@ -41,6 +43,8 @@ export default function AddInfluencer() {
     combines_product: true,
     combines_order: false,
     combines_shipping: false,
+    destination: '/',
+    destination_custom: '',
   });
 
   // Auto-generate code when name or discount_value changes
@@ -212,7 +216,7 @@ Share the link in your bio and stories. Let's get started! 🚀`;
         {/* Actions */}
         <div className="flex gap-3">
           <button
-            onClick={() => { setResult(null); setForm({ name: '', platform: 'instagram', handle: '', profile_image_url: '', discount_code: '', discount_type: 'percentage', discount_value: 5, commission_pct: 5, payout_day: 1, notes: '', combines_product: true, combines_order: false, combines_shipping: false }); }}
+            onClick={() => { setResult(null); setForm({ name: '', platform: 'instagram', handle: '', profile_image_url: '', discount_code: '', discount_type: 'percentage', discount_value: 5, commission_pct: 5, payout_day: 1, notes: '', combines_product: true, combines_order: false, combines_shipping: false, destination: '/', destination_custom: '' }); }}
             className="flex-1 px-4 py-2.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50"
           >
             + Add Another
@@ -294,6 +298,39 @@ Share the link in your bio and stories. Let's get started! 🚀`;
         </Section>
 
         {/* Discount */}
+        {/* Destination */}
+        <Section title="Link Destination">
+          <Field label="Where should the link take customers?">
+            <select
+              value={form.destination}
+              onChange={e => setForm(f => ({ ...f, destination: e.target.value }))}
+              className="input"
+            >
+              <option value="/">Home Page</option>
+              <option value="/collections">All Collections</option>
+              <option value="/collections/korean-beauty">Korean Beauty</option>
+              <option value="/collections/skincare">Skincare</option>
+              <option value="/collections/haircare">Haircare</option>
+              <option value="/collections/supplements">Supplements</option>
+              <option value="custom">Custom URL</option>
+            </select>
+          </Field>
+          {form.destination === 'custom' && (
+            <Field label="Custom path">
+              <div className="relative">
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm">dropy.in</span>
+                <input
+                  type="text"
+                  value={form.destination_custom}
+                  onChange={e => setForm(f => ({ ...f, destination_custom: e.target.value }))}
+                  placeholder="/collections/your-collection"
+                  className="input pl-20"
+                />
+              </div>
+            </Field>
+          )}
+        </Section>
+
         <Section title="Customer Discount">
           <div className="grid grid-cols-2 gap-4">
             <Field label="Type">

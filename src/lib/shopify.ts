@@ -193,3 +193,19 @@ export async function deactivateDiscount(priceRuleId: string) {
     },
   });
 }
+
+// ─── Create Short Link (URL Redirect) ────────
+export async function createShortLink(handle: string, destinationPath: string) {
+  const data = await shopifyREST('redirects.json', 'POST', {
+    redirect: {
+      path: `/s/${handle.toLowerCase()}`,
+      target: destinationPath.startsWith('/') ? destinationPath : `/${destinationPath}`,
+    },
+  });
+
+  return {
+    redirect_id: String(data.redirect.id),
+    short_url: `https://${STOREFRONT_DOMAIN}/s/${handle.toLowerCase()}`,
+    path: data.redirect.path,
+  };
+}
