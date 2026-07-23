@@ -141,14 +141,14 @@ export default function InfluencerDashboard() {
         {/* Stats — 3 cards */}
         <div className="grid grid-cols-3 gap-3">
           {/* Clicks */}
-          <div className="glass p-4 sm:p-5 text-center">
-            <FlipCounter value={stats.clicks} color="#6c5ce7" />
-            <p className="text-[9px] sm:text-[10px] uppercase tracking-[0.15em] mt-2" style={{ color: 'var(--text-muted)' }}>Clicks</p>
+          <div className="rounded-[20px] p-4 sm:p-5 text-center shadow-lg" style={{ background: 'linear-gradient(135deg, #6c5ce7, #a29bfe)', boxShadow: '0 8px 24px rgba(108,92,231,0.25)' }}>
+            <FlipCounter value={stats.clicks} color="#ffffff" />
+            <p className="text-[9px] sm:text-[10px] uppercase tracking-[0.15em] mt-2 text-white/60">Clicks</p>
           </div>
           {/* Orders */}
-          <div className="glass p-4 sm:p-5 text-center">
-            <FlipCounter value={stats.orders} color="#e17055" />
-            <p className="text-[9px] sm:text-[10px] uppercase tracking-[0.15em] mt-2" style={{ color: 'var(--text-muted)' }}>Orders</p>
+          <div className="rounded-[20px] p-4 sm:p-5 text-center shadow-lg" style={{ background: 'linear-gradient(135deg, #e17055, #fab1a0)', boxShadow: '0 8px 24px rgba(225,112,85,0.25)' }}>
+            <FlipCounter value={stats.orders} color="#ffffff" />
+            <p className="text-[9px] sm:text-[10px] uppercase tracking-[0.15em] mt-2 text-white/60">Orders</p>
           </div>
           {/* Earned */}
           <div className="rounded-[20px] p-4 sm:p-5 text-center shadow-lg" style={{ background: 'linear-gradient(135deg, #00b894, #55efc4)', boxShadow: '0 8px 24px rgba(0,184,148,0.25)' }}>
