@@ -2,7 +2,7 @@
 import { useEffect, useState, useRef } from 'react';
 import { useParams } from 'next/navigation';
 import { format } from 'date-fns';
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
+import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
 
 interface DashboardData {
   influencer: { name: string; platform: string; handle: string | null; profile_image_url: string | null; discount_code: string; commission_pct: number; shareable_link: string; original_link: string; member_since: string; };
@@ -193,16 +193,42 @@ export default function InfluencerDashboard() {
           </div>
           <div className="h-48 sm:h-56">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={data.chart} barCategoryGap="20%">
+              <AreaChart data={data.chart}>
+                <defs>
+                  <linearGradient id="gradClicks" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="#6c5ce7" stopOpacity={0.3} />
+                    <stop offset="100%" stopColor="#6c5ce7" stopOpacity={0} />
+                  </linearGradient>
+                  <linearGradient id="gradOrders" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="#e17055" stopOpacity={0.3} />
+                    <stop offset="100%" stopColor="#e17055" stopOpacity={0} />
+                  </linearGradient>
+                  <linearGradient id="gradCommission" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="#00b894" stopOpacity={0.3} />
+                    <stop offset="100%" stopColor="#00b894" stopOpacity={0} />
+                  </linearGradient>
+                  <filter id="glow">
+                    <feGaussianBlur stdDeviation="3" result="blur" />
+                    <feMerge><feMergeNode in="blur" /><feMergeNode in="SourceGraphic" /></feMerge>
+                  </filter>
+                </defs>
                 <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,0,0,0.04)" vertical={false} />
                 <XAxis dataKey="date" tick={{ fontSize: 10, fill: '#999' }} axisLine={false} tickLine={false} />
                 <YAxis tick={{ fontSize: 10, fill: '#999' }} axisLine={false} tickLine={false} width={30} />
                 <Tooltip
-                  contentStyle={{ background: '#fff', border: '1px solid #eee', borderRadius: 12, fontSize: 12, boxShadow: '0 4px 16px rgba(0,0,0,0.08)' }}
-                  cursor={{ fill: 'rgba(108,92,231,0.04)' }}
+                  contentStyle={{ background: 'rgba(255,255,255,0.95)', backdropFilter: 'blur(8px)', border: '1px solid rgba(0,0,0,0.06)', borderRadius: 16, fontSize: 12, boxShadow: '0 8px 32px rgba(0,0,0,0.08)', padding: '10px 14px' }}
+                  cursor={{ stroke: chartColors[chartView], strokeWidth: 1, strokeDasharray: '4 4' }}
                 />
-                <Bar dataKey={chartView} fill={chartColors[chartView]} radius={[6, 6, 0, 0]} />
-              </BarChart>
+                <Area
+                  type="monotone"
+                  dataKey={chartView}
+                  stroke={chartColors[chartView]}
+                  strokeWidth={2.5}
+                  fill={`url(#grad${chartView.charAt(0).toUpperCase() + chartView.slice(1)})`}
+                  dot={{ r: 4, fill: '#fff', stroke: chartColors[chartView], strokeWidth: 2 }}
+                  activeDot={{ r: 6, fill: chartColors[chartView], stroke: '#fff', strokeWidth: 2, filter: 'url(#glow)' }}
+                />
+              </AreaChart>
             </ResponsiveContainer>
           </div>
         </div>
