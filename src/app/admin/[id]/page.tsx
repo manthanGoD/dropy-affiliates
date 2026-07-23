@@ -217,7 +217,7 @@ export default function InfluencerDetailPage() {
           <div className="text-center">
             <p className="text-4xl mb-3">⚠️</p>
             <h3 className="text-lg font-bold text-gray-900">Delete {data.name}?</h3>
-            <p className="text-sm text-gray-500 mt-2">This removes all orders and payouts for this influencer. The Shopify campaign and discount code will remain — delete those manually in Shopify if needed.</p>
+            <p className="text-sm text-gray-500 mt-2">This will delete all data for this influencer including orders, payouts, Shopify campaign, and discount code. This cannot be undone.</p>
             <div className="flex gap-3 mt-6">
               <button onClick={() => setShowDelete(false)} className="flex-1 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50">Cancel</button>
               <button onClick={deleteInfluencer} className="flex-1 px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700">Delete</button>

@@ -73,14 +73,59 @@ export async function PATCH(
   return NextResponse.json(data);
 }
 
-// DELETE — remove influencer and related data
+// DELETE — remove influencer, Shopify campaign + discount, and related data
 export async function DELETE(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params;
 
-  // Orders and payouts cascade-delete via FK
+  // 1. Get influencer details for Shopify cleanup
+  const { data: inf } = await supabaseAdmin
+    .from('influencers')
+    .select('discount_code, shopify_campaign_id, campaign_id')
+    .eq('id', id)
+    .single();
+
+  // 2. Delete Shopify discount (price rule) if exists
+  if (inf?.discount_code) {
+    try {
+      // Find price rule by discount code
+      const DOMAIN = process.env.SHOPIFY_STORE_DOMAIN!;
+      const TOKEN = process.env.SHOPIFY_ACCESS_TOKEN!;
+      const headers = { 'Content-Type': 'application/json', 'X-Shopify-Access-Token': TOKEN };
+
+      // Search for the price rule
+      const prRes = await fetch(`https://${DOMAIN}/admin/api/2024-10/price_rules.json`, { headers });
+      if (prRes.ok) {
+        const prData = await prRes.json();
+        const rule = prData.price_rules?.find((r: { title: string }) => r.title === inf.discount_code);
+        if (rule) {
+          await fetch(`https://${DOMAIN}/admin/api/2024-10/price_rules/${rule.id}.json`, { method: 'DELETE', headers });
+          console.log(`[DELETE] Shopify price rule ${rule.id} deleted for ${inf.discount_code}`);
+        }
+      }
+    } catch (err) {
+      console.log('[DELETE] Shopify discount cleanup failed (non-blocking):', err);
+    }
+  }
+
+  // 3. Delete Shopify marketing event if exists
+  if (inf?.shopify_campaign_id) {
+    try {
+      const DOMAIN = process.env.SHOPIFY_STORE_DOMAIN!;
+      const TOKEN = process.env.SHOPIFY_ACCESS_TOKEN!;
+      await fetch(`https://${DOMAIN}/admin/api/2024-10/marketing_events/${inf.shopify_campaign_id}.json`, {
+        method: 'DELETE',
+        headers: { 'X-Shopify-Access-Token': TOKEN },
+      });
+      console.log(`[DELETE] Shopify campaign ${inf.shopify_campaign_id} deleted`);
+    } catch (err) {
+      console.log('[DELETE] Shopify campaign cleanup failed (non-blocking):', err);
+    }
+  }
+
+  // 4. Delete from Supabase (orders + payouts cascade)
   const { error } = await supabaseAdmin
     .from('influencers')
     .delete()
