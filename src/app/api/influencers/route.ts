@@ -76,22 +76,28 @@ export async function POST(req: NextRequest) {
       };
     }
 
-    // 3. Create Shopify discount code
+    // 3. Create Shopify discount code (skip if no customer discount)
     let discountResult = { discount_id: '', code: discount_code };
-    try {
-      discountResult = await createDiscountCode(discount_code, discount_type, discount_value, {
-        productDiscounts: combines_product ?? true,
-        orderDiscounts: combines_order ?? false,
-        shippingDiscounts: combines_shipping ?? false,
-      });
-      console.log('[4] Shopify discount created:', discountResult.code);
-    } catch (err) {
-      console.log('[4] Discount creation failed (using fallback):', (err as Error).message);
+    if (discount_value > 0) {
+      try {
+        discountResult = await createDiscountCode(discount_code, discount_type, discount_value, {
+          productDiscounts: combines_product ?? true,
+          orderDiscounts: combines_order ?? false,
+          shippingDiscounts: combines_shipping ?? false,
+        });
+        console.log('[4] Shopify discount created:', discountResult.code);
+      } catch (err) {
+        console.log('[4] Discount creation failed (using fallback):', (err as Error).message);
+      }
+    } else {
+      console.log('[4] No customer discount — skipping Shopify discount creation');
     }
 
-    // 4. Build discount link
-    const discountLink = `https://dropy.in/discount/${discount_code.toUpperCase()}?utm_campaign=${campaignResult.campaign_id}&utm_source=influencer&utm_medium=social`;
-    console.log('[5] Discount link:', discountLink);
+    // 4. Build shareable link
+    const discountLink = discount_value > 0
+      ? `https://dropy.in/discount/${discount_code.toUpperCase()}?utm_campaign=${campaignResult.campaign_id}&utm_source=influencer&utm_medium=social`
+      : `https://dropy.in?utm_campaign=${campaignResult.campaign_id}&utm_source=influencer&utm_medium=social`;
+    console.log('[5] Shareable link:', discountLink);
 
     // 5. Save to Supabase
     const insertPayload = {

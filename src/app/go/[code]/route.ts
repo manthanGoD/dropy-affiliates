@@ -11,7 +11,7 @@ export async function GET(
   // Find influencer by discount code
   const { data: inf } = await supabaseAdmin
     .from('influencers')
-    .select('id, shareable_link, discount_code')
+    .select('id, shareable_link, discount_code, discount_value')
     .eq('discount_code', upperCode)
     .single();
 
@@ -23,7 +23,9 @@ export async function GET(
   // Log the click (non-blocking)
   supabaseAdmin.from('clicks').insert({ influencer_id: inf.id }).then(() => {});
 
-  // Redirect to the discount URL on Shopify
-  const discountUrl = `https://dropy.in/discount/${inf.discount_code}`;
-  return NextResponse.redirect(discountUrl, { status: 302 });
+  // Redirect — to discount URL if discount exists, otherwise homepage
+  const redirectUrl = inf.discount_value && inf.discount_value > 0
+    ? `https://dropy.in/discount/${inf.discount_code}`
+    : 'https://dropy.in';
+  return NextResponse.redirect(redirectUrl, { status: 302 });
 }

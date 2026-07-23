@@ -292,13 +292,13 @@ Share the link in your bio and mention the code in your content. Let's get start
                   value={form.discount_value || ''}
                   onChange={e => setForm(f => ({ ...f, discount_value: e.target.value === '' ? 0 : parseInt(e.target.value) }))}
                   className="input pr-8"
-                  min={1}
-                  required
+                  min={0}
                 />
                 <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm">
                   {form.discount_type === 'percentage' ? '%' : '₹'}
                 </span>
               </div>
+              {form.discount_value === 0 && <p className="text-xs text-amber-600 mt-1">No customer discount — link only for tracking + commission</p>}
             </Field>
           </div>
 
@@ -378,7 +378,7 @@ Share the link in your bio and mention the code in your content. Let's get start
             <div className="space-y-1.5 text-sm">
               <p><span className="text-gray-500">Campaign:</span> <span className="font-medium">{campaignPreview}</span></p>
               <p><span className="text-gray-500">Code:</span> <span className="font-mono font-medium">{form.discount_code.toUpperCase()}</span></p>
-              <p><span className="text-gray-500">Customer gets:</span> <span className="font-medium">{form.discount_type === 'percentage' ? `${form.discount_value}%` : `₹${form.discount_value}`} off</span></p>
+              <p><span className="text-gray-500">Customer gets:</span> <span className="font-medium">{form.discount_value === 0 ? 'No discount (tracking only)' : form.discount_type === 'percentage' ? `${form.discount_value}%` : `₹${form.discount_value}`}{form.discount_value > 0 ? ' off' : ''}</span></p>
               <p><span className="text-gray-500">Influencer gets:</span> <span className="font-medium">{form.commission_pct}% commission</span></p>
               <p><span className="text-gray-500">Stacks with:</span> <span className="font-medium">{[form.combines_product && 'Product', form.combines_order && 'Order', form.combines_shipping && 'Shipping'].filter(Boolean).join(', ') || 'Nothing (standalone)'}</span></p>
             </div>
