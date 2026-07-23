@@ -93,11 +93,10 @@ export async function POST(req: NextRequest) {
       console.log('[4] No customer discount — skipping Shopify discount creation');
     }
 
-    // 4. Build shareable link
-    const discountLink = discount_value > 0
-      ? `https://dropy.in/discount/${discount_code.toUpperCase()}?utm_campaign=${campaignResult.campaign_id}&utm_source=influencer&utm_medium=social`
-      : `https://dropy.in?utm_campaign=${campaignResult.campaign_id}&utm_source=influencer&utm_medium=social`;
-    console.log('[5] Shareable link:', discountLink);
+    // 4. Build shareable link — short tracking URL
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://dropy-affiliates.vercel.app';
+    const shortLink = `${appUrl}/go/${discount_code.toUpperCase()}`;
+    console.log('[5] Shareable link:', shortLink);
 
     // 5. Save to Supabase
     const insertPayload = {
@@ -107,7 +106,7 @@ export async function POST(req: NextRequest) {
       profile_image_url: profile_image_url || null,
       campaign_name: campaignName,
       campaign_id: campaignResult.campaign_id,
-      shareable_link: discountLink,
+      shareable_link: shortLink,
       discount_code: discount_code.toUpperCase(),
       discount_type,
       discount_value,
