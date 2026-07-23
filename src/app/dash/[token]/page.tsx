@@ -77,7 +77,7 @@ export default function InfluencerDashboard() {
         {/* Tabs */}
         <div className="glass flex p-1">
           {(['daily','weekly','monthly','all_time'] as const).map(t => (
-            <button key={t} onClick={() => setTab(t)} className="flex-1 py-2.5 text-xs font-semibold rounded-2xl transition-all duration-200" style={{
+            <button key={t} onClick={() => setTab(t)} className="flex-1 py-2 sm:py-2.5 text-[10px] sm:text-xs font-semibold rounded-2xl transition-all duration-200" style={{
               background: tab === t ? 'var(--sidebar)' : 'transparent',
               color: tab === t ? '#fff' : 'var(--text-muted)',
               boxShadow: tab === t ? '0 4px 16px rgba(108,92,231,0.3)' : 'none',
@@ -89,12 +89,12 @@ export default function InfluencerDashboard() {
 
         {/* Stats */}
         <div className="grid grid-cols-2 gap-3">
-          <div className="glass p-5 text-center">
-            <p className="text-3xl font-bold" style={{ color: 'var(--purple)' }}>{stats.orders}</p>
+          <div className="glass p-4 sm:p-5 text-center">
+            <p className="text-2xl sm:text-3xl font-bold" style={{ color: 'var(--purple)' }}>{stats.orders}</p>
             <p className="text-[10px] uppercase tracking-[0.15em] mt-1.5" style={{ color: 'var(--text-muted)' }}>Orders</p>
           </div>
-          <div className="rounded-[20px] p-5 text-center text-white shadow-lg" style={{ background: 'linear-gradient(135deg, #00b894, #55efc4)', boxShadow: '0 8px 24px rgba(0,184,148,0.25)' }}>
-            <p className="text-3xl font-bold">{fmt(stats.commission)}</p>
+          <div className="rounded-[20px] p-4 sm:p-5 text-center text-white shadow-lg" style={{ background: 'linear-gradient(135deg, #00b894, #55efc4)', boxShadow: '0 8px 24px rgba(0,184,148,0.25)' }}>
+            <p className="text-2xl sm:text-3xl font-bold">{fmt(stats.commission)}</p>
             <p className="text-[10px] uppercase tracking-[0.15em] mt-1.5 text-white/60">Earned</p>
           </div>
         </div>

@@ -96,20 +96,20 @@ export default function InfluencerDetailPage() {
           </div>
         </div>
 
-        <div className="flex gap-2 flex-wrap">
-          <button onClick={() => setShowEdit(true)} className="px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50">
-            ✏️ Edit
+        <div className="flex gap-1.5 flex-wrap">
+          <button onClick={() => setShowEdit(true)} className="px-2.5 py-1.5 text-xs font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50">
+            ✏️ <span className="hidden sm:inline">Edit</span>
           </button>
-          <button onClick={syncOrders} disabled={syncing} className="px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50">
-            {syncing ? '⟳ Syncing...' : '⟳ Sync'}
+          <button onClick={syncOrders} disabled={syncing} className="px-2.5 py-1.5 text-xs font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50">
+            {syncing ? '⟳' : '⟳'} <span className="hidden sm:inline">{syncing ? 'Syncing...' : 'Sync'}</span>
           </button>
-          <a href={`/api/reports/${params.id}`} download className="px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 cursor-pointer">
-            📥 Report
+          <a href={`/api/reports/${params.id}`} download className="px-2.5 py-1.5 text-xs font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 cursor-pointer">
+            📥 <span className="hidden sm:inline">Report</span>
           </a>
-          <button onClick={() => setShowPayout(true)} className="px-3 py-2 text-sm font-medium text-white bg-emerald-600 rounded-lg hover:bg-emerald-700">
-            💰 Record Payout
+          <button onClick={() => setShowPayout(true)} className="px-2.5 py-1.5 text-xs font-medium text-white bg-emerald-600 rounded-lg hover:bg-emerald-700">
+            💰 <span className="hidden sm:inline">Payout</span>
           </button>
-          <button onClick={() => setShowDelete(true)} className="px-3 py-2 text-sm font-medium text-red-600 bg-white border border-red-200 rounded-lg hover:bg-red-50">
+          <button onClick={() => setShowDelete(true)} className="px-2.5 py-1.5 text-xs font-medium text-red-600 bg-white border border-red-200 rounded-lg hover:bg-red-50">
             🗑
           </button>
         </div>
@@ -412,10 +412,10 @@ function StatCard({ label, value, highlight }: { label: string; value: string; h
 
 function QuickCopy({ label, value, copied, onCopy }: { label: string; value: string; copied: boolean; onCopy: () => void }) {
   return (
-    <div className="bg-white rounded-lg border border-gray-200 p-3">
+    <div className="bg-white rounded-lg border border-gray-200 p-3 overflow-hidden">
       <p className="text-xs text-gray-500 font-medium mb-1">{label}</p>
       <div className="flex items-center gap-2">
-        <p className="text-xs text-gray-700 font-mono truncate flex-1">{value}</p>
+        <p className="text-[11px] text-gray-700 font-mono truncate flex-1 min-w-0">{value}</p>
         <button onClick={onCopy} className="shrink-0 text-xs text-gray-400 hover:text-gray-600">
           {copied ? '✓' : '⎘'}
         </button>
