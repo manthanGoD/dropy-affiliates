@@ -19,6 +19,30 @@ export default function AdminDashboard() {
   async function syncOrders() { setSyncing(true); await fetch('/api/sync', { method: 'POST', body: '{}' }); await fetchData(); setSyncing(false); }
   useEffect(() => { fetchData(); }, [fetchData]);
 
+  const [showImport, setShowImport] = useState(false);
+  const [untracked, setUntracked] = useState<{ code: string; discount: string; value: number; value_type: string; title: string }[]>([]);
+  const [importing, setImporting] = useState('');
+
+  async function scanShopify() {
+    setShowImport(true);
+    const res = await fetch('/api/import');
+    const data = await res.json();
+    setUntracked(data.untracked || []);
+  }
+
+  async function importCode(code: string) {
+    setImporting(code);
+    const item = untracked.find(u => u.code === code);
+    await fetch('/api/import', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ code, name: item?.title || code, platform: 'instagram', commission_pct: 5, discount_value: item?.value || 0, discount_type: item?.value_type || 'percentage' }),
+    });
+    setUntracked(prev => prev.filter(u => u.code !== code));
+    await fetchData();
+    setImporting('');
+  }
+
   if (loading) return (
     <div className="space-y-6 max-w-6xl">
       <div className="skeleton h-8 w-48" />
@@ -39,10 +63,13 @@ export default function AdminDashboard() {
           <h1 className="text-2xl font-bold tracking-tight" style={{ color: 'var(--text)' }}>Dashboard</h1>
           <p className="text-sm mt-0.5" style={{ color: 'var(--text-muted)' }}>Real-time affiliate performance</p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex gap-2 flex-wrap">
           <a href="/api/reports" download className="glass px-4 py-2.5 text-xs font-semibold transition-all hover:scale-[1.02] cursor-pointer" style={{ color: 'var(--text-sec)' }}>
             📥 Report
           </a>
+          <button onClick={scanShopify} className="glass px-4 py-2.5 text-xs font-semibold transition-all hover:scale-[1.02]" style={{ color: 'var(--text-sec)' }}>
+            📦 Import
+          </button>
           <button onClick={syncOrders} disabled={syncing} className="glass px-4 py-2.5 text-xs font-semibold transition-all disabled:opacity-40 hover:scale-[1.02]" style={{ color: 'var(--text-sec)' }}>
             {syncing ? '⟳ Syncing...' : '⟳ Sync'}
           </button>
@@ -105,6 +132,47 @@ export default function AdminDashboard() {
                 </div>
               </Link>
             ))}
+          </div>
+        </div>
+      )}
+
+      {/* Import Modal */}
+      {showImport && (
+        <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4" onClick={() => setShowImport(false)}>
+          <div className="bg-white rounded-2xl p-6 w-full max-w-lg max-h-[80vh] overflow-y-auto" onClick={e => e.stopPropagation()} style={{ background: 'var(--card-solid, #fff)' }}>
+            <h3 className="text-lg font-bold mb-1">Import from Shopify</h3>
+            <p className="text-xs mb-4" style={{ color: 'var(--text-muted)' }}>Discount codes found in Shopify but not tracked in your tool</p>
+            
+            {untracked.length === 0 ? (
+              <div className="text-center py-8">
+                <p className="text-2xl mb-2">✅</p>
+                <p className="text-sm font-medium">All synced!</p>
+                <p className="text-xs" style={{ color: 'var(--text-muted)' }}>No untracked discount codes found</p>
+              </div>
+            ) : (
+              <div className="space-y-2">
+                {untracked.map(u => (
+                  <div key={u.code} className="flex items-center justify-between p-3 rounded-xl border" style={{ borderColor: 'var(--border, #eee)' }}>
+                    <div>
+                      <p className="text-sm font-bold font-mono">{u.code}</p>
+                      <p className="text-[11px]" style={{ color: 'var(--text-muted)' }}>{u.discount} off · {u.title}</p>
+                    </div>
+                    <button
+                      onClick={() => importCode(u.code)}
+                      disabled={importing === u.code}
+                      className="px-3 py-1.5 text-[11px] font-bold text-white rounded-lg disabled:opacity-50"
+                      style={{ background: 'var(--purple, #6c5ce7)' }}
+                    >
+                      {importing === u.code ? '...' : 'Import'}
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            <button onClick={() => setShowImport(false)} className="w-full mt-4 py-2 text-xs font-medium rounded-xl border" style={{ borderColor: 'var(--border, #eee)', color: 'var(--text-sec)' }}>
+              Close
+            </button>
           </div>
         </div>
       )}
