@@ -289,8 +289,8 @@ Share the link in your bio and mention the code in your content. Let's get start
               <div className="relative">
                 <input
                   type="number"
-                  value={form.discount_value}
-                  onChange={e => setForm(f => ({ ...f, discount_value: Number(e.target.value) }))}
+                  value={form.discount_value || ''}
+                  onChange={e => setForm(f => ({ ...f, discount_value: e.target.value === '' ? 0 : parseInt(e.target.value) }))}
                   className="input pr-8"
                   min={1}
                   required
@@ -348,8 +348,8 @@ Share the link in your bio and mention the code in your content. Let's get start
               <div className="relative">
                 <input
                   type="number"
-                  value={form.commission_pct}
-                  onChange={e => setForm(f => ({ ...f, commission_pct: Number(e.target.value) }))}
+                  value={form.commission_pct || ''}
+                  onChange={e => setForm(f => ({ ...f, commission_pct: e.target.value === '' ? 0 : parseInt(e.target.value) }))}
                   className="input pr-8"
                   min={1}
                   max={50}
@@ -361,8 +361,8 @@ Share the link in your bio and mention the code in your content. Let's get start
             <Field label="Payout Day (of month)">
               <input
                 type="number"
-                value={form.payout_day}
-                onChange={e => setForm(f => ({ ...f, payout_day: Number(e.target.value) }))}
+                value={form.payout_day || ''}
+                onChange={e => setForm(f => ({ ...f, payout_day: e.target.value === '' ? 0 : parseInt(e.target.value) }))}
                 className="input"
                 min={1}
                 max={28}
