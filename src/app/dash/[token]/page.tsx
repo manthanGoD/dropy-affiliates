@@ -276,14 +276,19 @@ export default function InfluencerDashboard() {
         {data.recent_orders.length > 0 && (
           <div className="glass overflow-hidden">
             <div className="px-5 py-3 border-b" style={{ borderColor: 'rgba(0,0,0,0.04)' }}>
-              <p className="text-[10px] font-semibold uppercase tracking-[0.15em]" style={{ color: 'var(--text-muted)' }}>Recent Orders</p>
+              <div className="flex items-center justify-between">
+                <p className="text-[10px] font-semibold uppercase tracking-[0.15em]" style={{ color: 'var(--text-muted)' }}>Recent Orders</p>
+                <p className="text-[10px]" style={{ color: 'var(--text-muted)' }}>{data.recent_orders.length} orders</p>
+              </div>
             </div>
-            {data.recent_orders.map((o, i) => (
+            <div className="max-h-[280px] overflow-y-auto">
+              {data.recent_orders.map((o, i) => (
               <div key={i} className="px-5 py-3 flex items-center justify-between border-b last:border-0" style={{ borderColor: 'rgba(0,0,0,0.03)' }}>
                 <p className="text-xs" style={{ color: 'var(--text-sec)' }}>{format(new Date(o.date), 'dd MMM, h:mm a')}</p>
                 <p className="text-sm font-bold" style={{ color: 'var(--green)' }}>+{fmt(o.commission)}</p>
               </div>
             ))}
+            </div>
           </div>
         )}
 
