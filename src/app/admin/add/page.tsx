@@ -12,6 +12,12 @@ export default function AddInfluencer() {
   const [result, setResult] = useState<Influencer | null>(null);
   const [qrDataUrl, setQrDataUrl] = useState('');
   const [copied, setCopied] = useState('');
+  const [collections, setCollections] = useState<{ title: string; path: string }[]>([{ title: 'Home Page', path: '/' }]);
+
+  // Fetch collections from Shopify
+  useEffect(() => {
+    fetch('/api/collections').then(r => r.json()).then(setCollections).catch(() => {});
+  }, []);
 
   const [form, setForm] = useState<{
     name: string;
@@ -306,12 +312,9 @@ Share the link in your bio and stories. Let's get started! 🚀`;
               onChange={e => setForm(f => ({ ...f, destination: e.target.value }))}
               className="input"
             >
-              <option value="/">Home Page</option>
-              <option value="/collections">All Collections</option>
-              <option value="/collections/korean-beauty">Korean Beauty</option>
-              <option value="/collections/skincare">Skincare</option>
-              <option value="/collections/haircare">Haircare</option>
-              <option value="/collections/supplements">Supplements</option>
+              {collections.map(c => (
+                <option key={c.path} value={c.path}>{c.title}</option>
+              ))}
               <option value="custom">Custom URL</option>
             </select>
           </Field>
