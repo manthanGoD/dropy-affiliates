@@ -78,36 +78,60 @@ export async function createDiscountCode(
   discountType: 'percentage' | 'fixed',
   discountValue: number
 ) {
-  // Step 1: Create price rule
-  const priceRulePayload: Record<string, unknown> = {
-    price_rule: {
-      title: code,
-      target_type: 'line_item',
-      target_selection: 'all',
-      allocation_method: 'across',
-      value_type: discountType === 'percentage' ? 'percentage' : 'fixed_amount',
-      value: discountType === 'percentage' ? `-${discountValue}` : `-${discountValue}`,
-      customer_selection: 'all',
-      usage_limit: null,
-      once_per_customer: true,
-      starts_at: new Date().toISOString(),
+  // Use GraphQL to create discount with correct combinations
+  const mutation = `
+    mutation discountCodeBasicCreate($basicCodeDiscount: DiscountCodeBasicInput!) {
+      discountCodeBasicCreate(basicCodeDiscount: $basicCodeDiscount) {
+        codeDiscountNode {
+          id
+          codeDiscount {
+            ... on DiscountCodeBasic {
+              codes(first: 1) {
+                nodes { code }
+              }
+            }
+          }
+        }
+        userErrors { field message }
+      }
+    }
+  `;
+
+  const variables = {
+    basicCodeDiscount: {
+      title: code.toUpperCase(),
+      code: code.toUpperCase(),
+      startsAt: new Date().toISOString(),
+      customerGets: {
+        value: discountType === 'percentage'
+          ? { percentage: discountValue / 100 }
+          : { discountAmount: { amount: String(discountValue), appliesOnEachItem: false } },
+        items: { all: true },
+      },
+      customerSelection: { all: true },
+      appliesOncePerCustomer: true,
+      combinesWith: {
+        productDiscounts: true,
+        orderDiscounts: false,
+        shippingDiscounts: false,
+      },
     },
   };
 
-  const priceRuleData = await shopifyREST('price_rules.json', 'POST', priceRulePayload);
-  const priceRuleId = priceRuleData.price_rule.id;
+  const data = await shopifyGraphQL(mutation, variables);
+  const result = data.data.discountCodeBasicCreate;
 
-  // Step 2: Create discount code under the price rule
-  const discountData = await shopifyREST(
-    `price_rules/${priceRuleId}/discount_codes.json`,
-    'POST',
-    { discount_code: { code: code.toUpperCase() } }
-  );
+  if (result.userErrors?.length > 0) {
+    throw new Error(`Shopify discount error: ${result.userErrors.map((e: { message: string }) => e.message).join(', ')}`);
+  }
+
+  const discountId = result.codeDiscountNode?.id || '';
+  const createdCode = result.codeDiscountNode?.codeDiscount?.codes?.nodes?.[0]?.code || code.toUpperCase();
 
   return {
-    discount_id: String(discountData.discount_code.id),
-    price_rule_id: String(priceRuleId),
-    code: discountData.discount_code.code,
+    discount_id: discountId,
+    price_rule_id: '',
+    code: createdCode,
   };
 }
 
