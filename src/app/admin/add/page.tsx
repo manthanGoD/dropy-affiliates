@@ -43,10 +43,12 @@ export default function AddInfluencer() {
     combines_shipping: false,
   });
 
-  // Auto-generate discount code when name or discount_value changes
+  // Auto-generate code when name or discount_value changes
   useEffect(() => {
     if (form.name) {
-      const suggested = generateDiscountCode(form.name, form.discount_value);
+      const suggested = form.discount_value > 0
+        ? generateDiscountCode(form.name, form.discount_value)
+        : form.name.toUpperCase().replace(/\s+/g, '');
       setForm(prev => ({ ...prev, discount_code: suggested }));
     }
   }, [form.name, form.discount_value]);
@@ -98,11 +100,13 @@ export default function AddInfluencer() {
 
   function generateMessage() {
     if (!result) return '';
+    const hasDiscount = form.discount_value > 0;
     const discountText = form.discount_type === 'percentage'
       ? `${form.discount_value}% off`
       : `₹${form.discount_value} off`;
 
-    return `Hey ${result.name}! 🎉
+    if (hasDiscount) {
+      return `Hey ${result.name}! 🎉
 
 Here's everything you need to start promoting Dropy:
 
@@ -112,12 +116,27 @@ ${result.shareable_link}
 🏷️ Discount code for your followers:
 ${result.discount_code} (${discountText})
 
-💰 Your commission: ${result.commission_pct}% on every order through your code
+💰 Your commission: ${result.commission_pct}% on every order through your link or code
 
 📊 Track your performance:
 ${getDashboardUrl(result.dashboard_token)}
 
 Share the link in your bio and mention the code in your content. Let's get started! 🚀`;
+    } else {
+      return `Hey ${result.name}! 🎉
+
+Here's everything you need to start promoting Dropy:
+
+🔗 Your unique link:
+${result.shareable_link}
+
+💰 Your commission: ${result.commission_pct}% on every order through your link
+
+📊 Track your performance:
+${getDashboardUrl(result.dashboard_token)}
+
+Share the link in your bio and stories. Let's get started! 🚀`;
+    }
   }
 
   // ─── Result Screen ──────────────────────────
@@ -132,7 +151,7 @@ Share the link in your bio and mention the code in your content. Let's get start
             <span className="text-3xl">✅</span>
           </div>
           <h1 className="text-2xl font-bold text-gray-900">{result.name} is set up!</h1>
-          <p className="text-sm text-gray-500 mt-1">Campaign, discount code, and dashboard created</p>
+          <p className="text-sm text-gray-500 mt-1">{result.discount_value > 0 ? 'Campaign, discount code, and dashboard created' : 'Campaign, tracking link, and dashboard created'}</p>
         </div>
 
         {/* Quick copy cards */}
@@ -143,12 +162,14 @@ Share the link in your bio and mention the code in your content. Let's get start
             copied={copied === 'link'}
             onCopy={() => copyToClipboard(result.shareable_link || '', 'link')}
           />
-          <CopyCard
-            label="Discount Code"
-            value={result.discount_code}
-            copied={copied === 'code'}
-            onCopy={() => copyToClipboard(result.discount_code, 'code')}
-          />
+          {result.discount_value > 0 && (
+            <CopyCard
+              label="Discount Code"
+              value={result.discount_code}
+              copied={copied === 'code'}
+              onCopy={() => copyToClipboard(result.discount_code, 'code')}
+            />
+          )}
           <CopyCard
             label="Dashboard Link"
             value={dashboardUrl}
@@ -302,16 +323,16 @@ Share the link in your bio and mention the code in your content. Let's get start
             </Field>
           </div>
 
-          <Field label="Discount Code">
+          <Field label={form.discount_value > 0 ? "Discount Code" : "Tracking ID"}>
             <input
               type="text"
               value={form.discount_code}
               onChange={e => setForm(f => ({ ...f, discount_code: e.target.value }))}
-              placeholder="Auto-generated from name"
+              placeholder={form.discount_value > 0 ? "Auto-generated from name" : "Used for tracking link only"}
               className="input font-mono uppercase"
               required
             />
-            <p className="text-xs text-gray-400 mt-1">Auto-suggested. Edit before saving if needed.</p>
+            <p className="text-xs text-gray-400 mt-1">{form.discount_value > 0 ? 'Auto-suggested. Edit before saving if needed.' : 'Used in the tracking link — no discount code created in Shopify.'}</p>
           </Field>
         </Section>
 
