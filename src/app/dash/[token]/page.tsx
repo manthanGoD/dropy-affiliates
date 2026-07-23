@@ -14,14 +14,14 @@ interface DashboardData {
 }
 type S = { clicks: number; orders: number; revenue: number; commission: number };
 
-function AnimatedNumber({ value, prefix = '' }: { value: number; prefix?: string }) {
+function FlipCounter({ value, prefix = '', color = '#6c5ce7' }: { value: number; prefix?: string; color?: string }) {
   const [display, setDisplay] = useState(0);
   const ref = useRef<number>(0);
   useEffect(() => {
     const start = ref.current;
     const diff = value - start;
-    if (diff === 0) return;
-    const duration = 800;
+    if (diff === 0) { setDisplay(value); return; }
+    const duration = 1000;
     const startTime = performance.now();
     function tick(now: number) {
       const elapsed = now - startTime;
@@ -34,7 +34,27 @@ function AnimatedNumber({ value, prefix = '' }: { value: number; prefix?: string
     }
     requestAnimationFrame(tick);
   }, [value]);
-  return <>{prefix}{display.toLocaleString('en-IN')}</>;
+
+  const formatted = display.toLocaleString('en-IN');
+  const digits = (prefix + formatted).split('');
+
+  return (
+    <div className="flex items-center justify-center gap-[3px]">
+      {digits.map((d, i) => (
+        d === ',' ? (
+          <span key={i} className="text-lg font-bold mx-[-2px]" style={{ color: 'rgba(0,0,0,0.2)' }}>,</span>
+        ) : (
+          <div key={i} className="relative w-[28px] h-[40px] sm:w-[34px] sm:h-[48px] rounded-lg overflow-hidden" style={{ background: '#1a1a2e', boxShadow: '0 4px 12px rgba(0,0,0,0.15), inset 0 1px 0 rgba(255,255,255,0.05)' }}>
+            <div className="absolute inset-0 flex items-center justify-center">
+              <span className="text-xl sm:text-2xl font-bold tabular-nums" style={{ color }}>{d}</span>
+            </div>
+            <div className="absolute left-0 right-0 top-1/2 h-[1px]" style={{ background: 'rgba(0,0,0,0.3)' }} />
+            <div className="absolute inset-0 rounded-lg" style={{ boxShadow: 'inset 0 -1px 2px rgba(0,0,0,0.2), inset 0 1px 2px rgba(255,255,255,0.03)' }} />
+          </div>
+        )
+      ))}
+    </div>
+  );
 }
 
 export default function InfluencerDashboard() {
@@ -122,24 +142,18 @@ export default function InfluencerDashboard() {
         <div className="grid grid-cols-3 gap-3">
           {/* Clicks */}
           <div className="glass p-4 sm:p-5 text-center">
-            <p className="text-2xl sm:text-3xl font-bold" style={{ color: 'var(--purple)' }}>
-              <AnimatedNumber value={stats.clicks} />
-            </p>
-            <p className="text-[9px] sm:text-[10px] uppercase tracking-[0.15em] mt-1.5" style={{ color: 'var(--text-muted)' }}>Clicks</p>
+            <FlipCounter value={stats.clicks} color="#6c5ce7" />
+            <p className="text-[9px] sm:text-[10px] uppercase tracking-[0.15em] mt-2" style={{ color: 'var(--text-muted)' }}>Clicks</p>
           </div>
           {/* Orders */}
           <div className="glass p-4 sm:p-5 text-center">
-            <p className="text-2xl sm:text-3xl font-bold" style={{ color: 'var(--orange)' }}>
-              <AnimatedNumber value={stats.orders} />
-            </p>
-            <p className="text-[9px] sm:text-[10px] uppercase tracking-[0.15em] mt-1.5" style={{ color: 'var(--text-muted)' }}>Orders</p>
+            <FlipCounter value={stats.orders} color="#e17055" />
+            <p className="text-[9px] sm:text-[10px] uppercase tracking-[0.15em] mt-2" style={{ color: 'var(--text-muted)' }}>Orders</p>
           </div>
           {/* Earned */}
-          <div className="rounded-[20px] p-4 sm:p-5 text-center text-white shadow-lg" style={{ background: 'linear-gradient(135deg, #00b894, #55efc4)', boxShadow: '0 8px 24px rgba(0,184,148,0.25)' }}>
-            <p className="text-2xl sm:text-3xl font-bold">
-              <AnimatedNumber value={stats.commission} prefix="₹" />
-            </p>
-            <p className="text-[9px] sm:text-[10px] uppercase tracking-[0.15em] mt-1.5 text-white/60">Earned</p>
+          <div className="rounded-[20px] p-4 sm:p-5 text-center shadow-lg" style={{ background: 'linear-gradient(135deg, #00b894, #55efc4)', boxShadow: '0 8px 24px rgba(0,184,148,0.25)' }}>
+            <FlipCounter value={stats.commission} prefix="₹" color="#ffffff" />
+            <p className="text-[9px] sm:text-[10px] uppercase tracking-[0.15em] mt-2 text-white/60">Earned</p>
           </div>
         </div>
 
