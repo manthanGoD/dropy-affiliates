@@ -95,7 +95,7 @@ export async function POST(req: NextRequest) {
 
     // 4. Build shareable link — short tracking URL
     const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://dropy-affiliates.vercel.app';
-    const shortLink = `${appUrl}/go/${discount_code.toUpperCase()}`;
+    const shortLink = `${appUrl}/${discount_code.toUpperCase()}`;
     console.log('[5] Shareable link:', shortLink);
 
     // 5. Save to Supabase
