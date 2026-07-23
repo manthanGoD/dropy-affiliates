@@ -103,6 +103,9 @@ export default function InfluencerDetailPage() {
           <button onClick={syncOrders} disabled={syncing} className="px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50">
             {syncing ? '⟳ Syncing...' : '⟳ Sync'}
           </button>
+          <a href={`/api/reports/${params.id}`} download className="px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 cursor-pointer">
+            📥 Report
+          </a>
           <button onClick={() => setShowPayout(true)} className="px-3 py-2 text-sm font-medium text-white bg-emerald-600 rounded-lg hover:bg-emerald-700">
             💰 Record Payout
           </button>

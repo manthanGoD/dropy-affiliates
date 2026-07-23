@@ -40,6 +40,9 @@ export default function AdminDashboard() {
           <p className="text-sm mt-0.5" style={{ color: 'var(--text-muted)' }}>Real-time affiliate performance</p>
         </div>
         <div className="flex gap-2">
+          <a href="/api/reports" download className="glass px-4 py-2.5 text-xs font-semibold transition-all hover:scale-[1.02] cursor-pointer" style={{ color: 'var(--text-sec)' }}>
+            📥 Report
+          </a>
           <button onClick={syncOrders} disabled={syncing} className="glass px-4 py-2.5 text-xs font-semibold transition-all disabled:opacity-40 hover:scale-[1.02]" style={{ color: 'var(--text-sec)' }}>
             {syncing ? '⟳ Syncing...' : '⟳ Sync'}
           </button>
